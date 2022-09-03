@@ -13,6 +13,7 @@ export async function addRechargeService(cardId: number, amount: number, APIKey:
     if (!dbCompany) throw anauthorizedCompanyError();
     if (!dbCard) throw notFoundError("card");
     if (!dbCard.password) throw ActivatedCardError();
+    if (dbCard.isVirtual) throw { type: "anathorized", message: "VirtualCards can not be recharged"};
     if (dayjs(dbCard.expirationDate).diff(dayjs()) < 0) throw expirateCardError();
 
     await insert({cardId, amount});
