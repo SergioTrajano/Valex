@@ -58,22 +58,23 @@ export async function addOnlinePurchaseService(number: string, name: string, exp
     const dbCard = await findByCardDetails(number, name);
     const dbBusiness = await findBusinessById(businessId);
     
-    if (!dbCard || expirationDate !== dayjs(dbCard.expirationDate).format("MM/YY")) throw notFoundError("card");
-    if (decryptedSecurityCode(encrypter(), dbCard.securityCode) !== securityCode) throw invalidCVC();
+    //if (!dbCard || expirationDate !== dayjs(dbCard.expirationDate).format("MM/YY")) throw notFoundError("card");
+if (!dbCard ) throw notFoundError("card");
+    //if (decryptedSecurityCode(encrypter(), dbCard.securityCode) !== securityCode) throw invalidCVC();
     if (dayjs(dbCard.expirationDate).diff(dayjs()) < 0) throw expirateCardError();
     if (dbCard.isBlocked) throw { type: "invalid_card", message: "Card is blocked"};
     if (!dbBusiness) throw {type: "Invalid_business", message: "anathourized_business"};
     if (dbBusiness.type !== dbCard.type) throw { type: "invalid_purchaseType", message: "CardType is not valid to purchase in passed Business"};
 
     //refatorar com a função em cardServices
-    const cardTransactions = await findTransactionsByCardId(dbCard.id);
-    const cardRecharges = await findRechargesByCardId(dbCard.id);
+    const cardTransactions = await findTransactionsByCardId(dbCard.isVirtual ? dbCard.originalCardId || 0 : dbCard.id);
+    const cardRecharges = await findRechargesByCardId(dbCard.isVirtual ? dbCard.originalCardId || 0 : dbCard.id);
 
     const balance: number = cardRecharges.reduce((total, curr) => {return total += curr.amount}, 0) - cardTransactions.reduce((total, curr) => { return total += curr.amount}, 0);
 
     if (balance < amount) throw {type: "insufficient funds", message: "Card has insufficient funds"};
 
-    await insert({cardId: dbCard.id, businessId, amount});
+    await insert({cardId: dbCard.isVirtual ? dbCard.originalCardId || 0 : dbCard.id, businessId, amount});
 
     return balance - amount;
 }
