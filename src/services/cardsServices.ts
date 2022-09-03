@@ -7,6 +7,8 @@ import dotenv from "dotenv";
 import { findById as findEmployeeById } from "../repositories/employeeRepository";
 import { findByApiKey } from "../repositories/companyRepository";
 import { findByTypeAndEmployeeId, insert, findById as findCardById, update } from "../repositories/cardRepository";
+import { findByCardId as findTransactionsByCardId } from "../repositories/paymentRepository";
+import { findByCardId as findRechargesByCardId } from "../repositories/rechargeRepository";
 import { anauthorizedCompanyError, creationNotAllowedError, notFoundError, expirateCardError, notBlockedError, invalidCVC, badPasswordError } from "../utils/errorGenerators";
 
 dotenv.config();
@@ -105,4 +107,20 @@ export async function activateCard(id: number, password: string, securityCode: s
     }
 
     await update(id, cardData);
+}
+
+export async function getCardStatement(cardId: number) {
+    const dbCard = await findCardById(cardId);
+    if (!dbCard) throw notFoundError("card");
+
+    const cardTransactions = await findTransactionsByCardId(cardId);
+    const cardRecharges = await findRechargesByCardId(cardId);
+
+    const cardStatement = {
+        balance: cardRecharges.reduce((total, curr) => {return total += curr.amount}, 0) - cardTransactions.reduce((total, curr) => { return total += curr.amount}, 0),
+        transactions: cardTransactions,
+        recharges: cardRecharges,
+    };
+
+    return cardStatement;
 }

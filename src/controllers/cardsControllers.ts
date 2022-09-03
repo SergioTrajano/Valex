@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 
-import { createCardname, activateCard} from "../services/cardsServices"
+import { createCardname, activateCard, getCardStatement } from "../services/cardsServices"
 
 export async function createCard(req: Request, res: Response) {
     const { employeeId, cardType } = req.body;
@@ -17,4 +17,11 @@ export async function unlockyCard(req: Request, res: Response) {
     await activateCard(id, password, securityCode);
 
     res.status(200).send("Activated!");
+}
+
+export async function cardStatement(req: Request, res: Response) {
+    const id: number = Number(req.params.cardId);
+    const cardStatement: Object = await getCardStatement(id);
+
+    res.status(200).send(cardStatement);
 }
