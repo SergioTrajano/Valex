@@ -3,8 +3,9 @@ import { faker } from "@faker-js/faker";
 import Cryptr from "cryptr";
 import dayjs from "dayjs";
 
-import { findById as findByCardId, find, insert } from "../repositories/cardRepository";
+import { findById as findByCardId, find, insert, remove } from "../repositories/cardRepository";
 import { notFoundError,  } from "../utils/errorGenerators";
+import db from "../postgresStrategy/db";
 
 //refatorar
 function comparePasswords(dbPassword: string , password: string) {
@@ -58,4 +59,14 @@ export async function createVirtualCardService(id: number, password: string) {
     await insert(cardData);
 
     return cardData;
+}
+
+export async function deleteVirtualCardService(id: number, password: string) {
+    const dbCard = await findByCardId(id);
+
+    if (!dbCard) throw notFoundError("card");
+    if (!dbCard.isVirtual) throw { type: "invalid_card_property", message: "Card is not virtual!"};
+    if(!comparePasswords(dbCard.password || "", password)) throw { type: "invalid_password", message: "Invalid credentials!"};
+
+    await remove(id);
 }
