@@ -6,7 +6,7 @@ import dotenv from "dotenv";
 
 import { findById as findEmployeeById } from "../repositories/employeeRepository";
 import { findByApiKey } from "../repositories/companyRepository";
-import { findByTypeAndEmployeeId, insert, findById as findCardById, update } from "../repositories/cardRepository";
+import { findByTypeAndEmployeeId, insert, findById as findCardById, update, find } from "../repositories/cardRepository";
 import { findByCardId as findTransactionsByCardId } from "../repositories/paymentRepository";
 import { findByCardId as findRechargesByCardId } from "../repositories/rechargeRepository";
 import { anauthorizedCompanyError, creationNotAllowedError, notFoundError, expirateCardError, invalidCVC, badPasswordError, ActivatedCardError } from "../utils/errorGenerators";
@@ -84,16 +84,21 @@ export async function createCardname(APIKey: any ,employeeId: number, cardType: 
     const dbCard = await findByTypeAndEmployeeId(cardType, employeeId);
     if (dbCard !== undefined) throw creationNotAllowedError();
 
+    const allDbCards = await find();
+
+    let cardNumber = generateCardNumber();
+    while (allDbCards.some(card => card.number === cardNumber)) cardNumber = generateCardNumber();
+
     const cardData = {
         employeeId,
-        number: generateCardNumber(),
+        number: cardNumber,
         cardholderName: formatCardHolderName(employeedData.fullName),
         securityCode: encryptedSecurityCode(encrypter()),
         expirationDate: generateExpirationDate(),
         password: undefined,
         isVirtual: false,
         originalCardId: undefined,
-        isBlocked: true,
+        isBlocked: false,
         type: cardType,
     }
     
