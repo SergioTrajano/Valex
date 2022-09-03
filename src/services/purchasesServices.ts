@@ -22,12 +22,6 @@ function encrypter() {
     return cryptr;
 }
 
-function encryptedSecurityCode(cryptr: Cryptr) {
-    const securityCode = faker.finance.creditCardCVV();
-
-    return cryptr.encrypt(securityCode);
-}
-
 function decryptedSecurityCode(cryptr: Cryptr, dbSecurityCode: string) {
     const decryptedCVC = cryptr.decrypt(dbSecurityCode);
 
@@ -40,6 +34,7 @@ export async function addPurchaseService(cardId: number, password: string, busin
 
     if (!dbCard) throw notFoundError("card");
     if (!dbCard.password) throw ActivatedCardError();
+    if (dbCard.isVirtual) throw { type: "anathorized", message: "VirtualCards can not be used to purchases"};
     if (dayjs(dbCard.expirationDate).diff(dayjs()) < 0) throw expirateCardError();
     if (dbCard.isBlocked) throw { type: "invalid_card", message: "Card is blocked"};
     if (!comparePasswords(password, dbCard.password)) throw { type: "invalid_password", message: "Invalid credentials!"};
