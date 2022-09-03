@@ -1,14 +1,14 @@
 import { Request, Response } from "express";
 
-import { createCardname, activateCard, getCardStatement } from "../services/cardsServices"
+import { createCardname, activateCard, getCardStatement, blockCardService } from "../services/cardsServices"
 
 export async function createCard(req: Request, res: Response) {
     const { employeeId, cardType } = req.body;
     const apiKey = req.headers['x-api-key'];
 
-    await createCardname(apiKey, employeeId, cardType);
+    const newCard: Object = await createCardname(apiKey, employeeId, cardType);
 
-    res.sendStatus(201);
+    res.status(201).send(newCard);
 }
 
 export async function unlockyCard(req: Request, res: Response) {
@@ -24,4 +24,14 @@ export async function cardStatement(req: Request, res: Response) {
     const cardStatement: Object = await getCardStatement(id);
 
     res.status(200).send(cardStatement);
+}
+
+export function blockCard(block: boolean) {
+    return async (req: Request, res: Response) => {
+    const { id, password } = req.body;
+
+    await blockCardService(id, password, block);
+
+    res.sendStatus(200);
+    }
 }

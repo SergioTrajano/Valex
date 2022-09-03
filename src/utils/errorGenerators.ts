@@ -14,8 +14,8 @@ export function expirateCardError() {
     return { type: "card_expired", message: "card_already_expired"};
 }
 
-export function notBlockedError() {
-    return { type: "card_is_not_blocked", message: "card_already_activated"};
+export function ActivatedCardError() {
+    return { type: "card_is_activated", message: "card_already_activated"};
 }
 
 export function invalidCVC() {

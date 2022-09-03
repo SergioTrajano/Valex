@@ -1,6 +1,6 @@
 import { faker } from "@faker-js/faker";
 import dayjs from "dayjs";
-import { hashSync } from "bcrypt";
+import { compareSync, hashSync } from "bcrypt";
 import Cryptr from "cryptr";
 import dotenv from "dotenv";
 
@@ -9,7 +9,7 @@ import { findByApiKey } from "../repositories/companyRepository";
 import { findByTypeAndEmployeeId, insert, findById as findCardById, update } from "../repositories/cardRepository";
 import { findByCardId as findTransactionsByCardId } from "../repositories/paymentRepository";
 import { findByCardId as findRechargesByCardId } from "../repositories/rechargeRepository";
-import { anauthorizedCompanyError, creationNotAllowedError, notFoundError, expirateCardError, notBlockedError, invalidCVC, badPasswordError } from "../utils/errorGenerators";
+import { anauthorizedCompanyError, creationNotAllowedError, notFoundError, expirateCardError, invalidCVC, badPasswordError, ActivatedCardError } from "../utils/errorGenerators";
 
 dotenv.config();
 
@@ -64,6 +64,16 @@ function rgxPassword(password: string) {
     return passwordRGX.test(password);
 }
 
+function hashPassword(password: string) {
+    const SALT: number = Number(process.env.BCRYPT_SALT);
+
+    return hashSync(password, SALT);
+}
+
+function comparePasswords(dbPassword: string , password: string) {
+    return compareSync(password, dbPassword);
+}
+
 export async function createCardname(APIKey: any ,employeeId: number, cardType: TransactionTypes) {
     const dbCompany = await findByApiKey(APIKey);
     if (!dbCompany) throw anauthorizedCompanyError();
@@ -88,19 +98,19 @@ export async function createCardname(APIKey: any ,employeeId: number, cardType: 
     }
     
     await insert(cardData);
+
+    return cardData;
 }
 
 export async function activateCard(id: number, password: string, securityCode: string) {
     const dbCard = await findCardById(id);
     if (!dbCard) throw notFoundError("card");
     if (dayjs(dbCard.expirationDate).diff(dayjs()) < 0) throw expirateCardError();
-    if (dbCard.password) throw notBlockedError();
+    if (dbCard.password) throw ActivatedCardError();
     if (decryptedSecurityCode( encrypter(), dbCard.securityCode) !== securityCode) throw invalidCVC();
     if (!rgxPassword(password)) throw badPasswordError();
 
-    const SALT: number = Number(process.env.BCRYPT_SALT);
-
-    const bcryptedPassword = hashSync(password, SALT);
+    const bcryptedPassword = hashPassword(password);
     const cardData = {
         password: bcryptedPassword,
         isBlocked: false,
@@ -123,4 +133,14 @@ export async function getCardStatement(cardId: number) {
     };
 
     return cardStatement;
+}
+
+export async function blockCardService(cardId: number, password: string, block: boolean) {
+    const dbCard = await findCardById(cardId);
+    if (!dbCard) throw notFoundError("card");
+    if (dayjs(dbCard.expirationDate).diff(dayjs()) < 0) throw expirateCardError();
+    if (dbCard.isBlocked === block) throw { type: "invalid_card_property", message: "Card is already blocked!"};
+    if (!comparePasswords(dbCard.password || "", password)) throw { type: "invalid_password", message: "Invalid credentials!"};
+
+    await update(cardId, { isBlocked: block });
 }

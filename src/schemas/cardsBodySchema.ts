@@ -9,4 +9,9 @@ export const activateCardSchema: ObjectSchema = joi.object({
     id: joi.number().integer().required(),
     securityCode: joi.string().required().pattern(/^[0-9]{3}$/),
     password: joi.string().required(),
-})
+});
+
+export const blockCardSchema = joi.object({
+    id: joi.number().integer().required(),
+    password: joi.string().required(),
+});
