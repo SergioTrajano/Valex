@@ -110,6 +110,7 @@ export async function createCardname(APIKey: any ,employeeId: number, cardType: 
 export async function activateCard(id: number, password: string, securityCode: string) {
     const dbCard = await findCardById(id);
     if (!dbCard) throw notFoundError("card");
+    if (dbCard.isVirtual) throw { type: "anathorized", message: "VirtualCards can not be activated"};
     if (dayjs(dbCard.expirationDate).diff(dayjs()) < 0) throw expirateCardError();
     if (dbCard.password) throw ActivatedCardError();
     if (decryptedSecurityCode( encrypter(), dbCard.securityCode) !== securityCode) throw invalidCVC();
