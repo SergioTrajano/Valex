@@ -7,6 +7,6 @@ import { addRecharge } from "../controllers/rechargeControllers";
 
 const router = Router();
 
-router.patch("/recharges", schemaValidateHeadersMiddleware(validateCompanyAPIInHeader), schemaValidateBodyMiddleware(addRechargeSchema), addRecharge);
+router.post("/recharges", schemaValidateHeadersMiddleware(validateCompanyAPIInHeader), schemaValidateBodyMiddleware(addRechargeSchema), addRecharge);
 
 export default router;

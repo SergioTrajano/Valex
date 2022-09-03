@@ -28,7 +28,7 @@ export async function findByCardId(cardId: number) {
 export async function insert(paymentData: PaymentInsertData) {
   const { cardId, businessId, amount } = paymentData;
 
-  db.query<any, [number, number, number]>(
+  await db.query<any, [number, number, number]>(
     `INSERT INTO payments ("cardId", "businessId", amount) VALUES ($1, $2, $3)`,
     [cardId, businessId, amount]
   );
