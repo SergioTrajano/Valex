@@ -15,7 +15,7 @@ server.use(express.json());
 server.use(routes);
 server.use(errorHandler);
 
-const PORT: Number = Number(process.env.PORT);
+const PORT: number = Number(process.env.PORT);
 
 server.listen(PORT, () => {
     console.log(`Servidor rodando na porta ${PORT}!`);

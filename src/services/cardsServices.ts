@@ -1,12 +1,13 @@
 import { faker } from "@faker-js/faker";
 import dayjs from "dayjs";
+import { hashSync } from "bcrypt";
 import Cryptr from "cryptr";
 import dotenv from "dotenv";
 
-import { findById } from "../repositories/employeeRepository";
+import { findById as findEmployeeById } from "../repositories/employeeRepository";
 import { findByApiKey } from "../repositories/companyRepository";
-import { findByTypeAndEmployeeId, insert } from "../repositories/cardRepository";
-import { anauthorizedCompanyError, creationNotAllowedError, notFoundEmployeeError } from "../utils/errorGenerators";
+import { findByTypeAndEmployeeId, insert, findById as findCardById, update } from "../repositories/cardRepository";
+import { anauthorizedCompanyError, creationNotAllowedError, notFoundError, expirateCardError, notBlockedError, invalidCVC, badPasswordError } from "../utils/errorGenerators";
 
 dotenv.config();
 
@@ -33,7 +34,7 @@ function formatCardHolderName(fullName: string) {
 }
 
 function generateExpirationDate() {
-    return dayjs().add(5, "year").format("MM/YY");
+    return dayjs().add(5, "year").format("MM/DD/YY");
 }
 
 function encrypter() {
@@ -49,12 +50,24 @@ function encryptedSecurityCode(cryptr: Cryptr) {
     return cryptr.encrypt(securityCode);
 }
 
+function decryptedSecurityCode(cryptr: Cryptr, dbSecurityCode: string) {
+    const decryptedCVC = cryptr.decrypt(dbSecurityCode);
+
+    return decryptedCVC; 
+}
+
+function rgxPassword(password: string) {
+    const passwordRGX = /^[0-9]{4,6}$/;
+
+    return passwordRGX.test(password);
+}
+
 export async function createCardname(APIKey: any ,employeeId: number, cardType: TransactionTypes) {
     const dbCompany = await findByApiKey(APIKey);
     if (!dbCompany) throw anauthorizedCompanyError();
 
-    const employeedData = await findById(employeeId);
-    if (!employeedData) throw notFoundEmployeeError();
+    const employeedData = await findEmployeeById(employeeId);
+    if (!employeedData) throw notFoundError("employee");
 
     const dbCard = await findByTypeAndEmployeeId(cardType, employeeId);
     if (dbCard !== undefined) throw creationNotAllowedError();
@@ -73,4 +86,23 @@ export async function createCardname(APIKey: any ,employeeId: number, cardType: 
     }
     
     await insert(cardData);
+}
+
+export async function activateCard(id: number, password: string, securityCode: string) {
+    const dbCard = await findCardById(id);
+    if (!dbCard) throw notFoundError("card");
+    if (dayjs(dbCard.expirationDate).diff(dayjs()) < 0) throw expirateCardError();
+    if (dbCard.password) throw notBlockedError();
+    if (decryptedSecurityCode( encrypter(), dbCard.securityCode) !== securityCode) throw invalidCVC();
+    if (!rgxPassword(password)) throw badPasswordError();
+
+    const SALT: number = Number(process.env.BCRYPT_SALT);
+
+    const bcryptedPassword = hashSync(password, SALT);
+    const cardData = {
+        password: bcryptedPassword,
+        isBlocked: false,
+    }
+
+    await update(id, cardData);
 }
