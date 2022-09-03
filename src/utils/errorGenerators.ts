@@ -3,7 +3,7 @@ export function anauthorizedCompanyError() {
 }
 
 export function notFoundError(entity: string) {
-    return { type: "invalid_employee", message: `invalid_${entity}_id`};
+    return { type: "invalid_employee", message: `invalid_${entity}`};
 }
 
 export function creationNotAllowedError() {

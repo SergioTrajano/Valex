@@ -32,7 +32,7 @@ function formatCardHolderName(fullName: string) {
         else if (name.length > 2) formatName += `${name[0].toUpperCase()} `
     });
 
-    return formatName;
+    return formatName.trim();
 }
 
 function generateExpirationDate() {
@@ -113,7 +113,6 @@ export async function activateCard(id: number, password: string, securityCode: s
     const bcryptedPassword = hashPassword(password);
     const cardData = {
         password: bcryptedPassword,
-        isBlocked: false,
     }
 
     await update(id, cardData);
