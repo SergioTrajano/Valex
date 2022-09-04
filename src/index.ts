@@ -13,7 +13,7 @@ const server = express();
 server.use(cors());
 server.use(express.json());
 server.use(routes);
-server.use(errorHandler);
+server.use(errorHandler); 
 
 const PORT: number = Number(process.env.PORT);
 
