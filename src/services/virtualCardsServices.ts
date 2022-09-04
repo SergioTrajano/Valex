@@ -1,37 +1,10 @@
-import { compareSync } from "bcrypt";
-import { faker } from "@faker-js/faker";
-import Cryptr from "cryptr";
 import dayjs from "dayjs";
 
+import { comparePasswords } from "../utils/passwordENcrypter";
+import * as generateCardData from "../utils/generateCardData";
+import { encryptSecurityCode } from "../utils/securityCodeEncrypter";
 import { findById as findByCardId, find, insert, remove } from "../repositories/cardRepository";
-import { notFoundError,  } from "../utils/errorGenerators";
-import db from "../postgresStrategy/db";
-
-//refatorar
-function comparePasswords(dbPassword: string , password: string) {
-    return compareSync(password, dbPassword);
-}
-
-function generateCardNumber() {
-    return faker.finance.creditCardNumber();
-}
-
-function encrypter() {
-    const CRYPTR_KEY: string = process.env.CRYPTR_KEY || "valex";
-    const cryptr = new Cryptr(CRYPTR_KEY);
-
-    return cryptr;
-}
-
-function encryptedSecurityCode(cryptr: Cryptr) {
-    const securityCode = faker.finance.creditCardCVV();
-
-    return cryptr.encrypt(securityCode);
-}
-
-function generateExpirationDate() {
-    return dayjs().add(5, "year").format("MM/DD/YY");
-}
+import { notFoundError, expirateCardError } from "../utils/errorGenerators";
 
 export async function createVirtualCardService(id: number, password: string) {
     const dbCard = await findByCardId(id);
@@ -39,16 +12,17 @@ export async function createVirtualCardService(id: number, password: string) {
 
     if (!dbCard) throw notFoundError("card");
     if(!comparePasswords(dbCard.password || "", password)) throw { type: "invalid_password", message: "Invalid credentials!"};
+    if (dayjs(dbCard.expirationDate.split("/")[0]+"/01/"+dbCard.expirationDate.split("/")[1]).diff(dayjs(), "month") < 0) throw expirateCardError();
 
-    let cardNumber = generateCardNumber();
-    while (allDbCards.some(card => card.number === cardNumber)) cardNumber = generateCardNumber();
+    let cardNumber = generateCardData.generateCardNumber();
+    while (allDbCards.some(card => card.number === cardNumber)) cardNumber = generateCardData.generateCardNumber();
 
     const cardData = {
         employeeId: dbCard.employeeId,
         number: cardNumber,
         cardholderName: dbCard.cardholderName,
-        securityCode: encryptedSecurityCode(encrypter()),
-        expirationDate: generateExpirationDate(),
+        securityCode: encryptSecurityCode(generateCardData.generateSecurityCode()),
+        expirationDate: generateCardData.generateExpirationDate(),
         password: dbCard.password,
         isVirtual: true,
         originalCardId: dbCard.id,

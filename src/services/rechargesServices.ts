@@ -5,6 +5,7 @@ import { findById as findCardById } from "../repositories/cardRepository";
 import { findByCardId as findRechargesByCardId ,insert } from "../repositories/rechargeRepository";
 import { findByCardId as findTransactionsByCardId } from "../repositories/paymentRepository";
 import { findByApiKey } from "../repositories/companyRepository";
+import { generateBalance } from "../utils/generateCardData";
 
 export async function addRechargeService(cardId: number, amount: number, APIKey: string) {
     const dbCard = await findCardById(cardId);
@@ -14,13 +15,15 @@ export async function addRechargeService(cardId: number, amount: number, APIKey:
     if (!dbCard) throw notFoundError("card");
     if (!dbCard.password) throw ActivatedCardError();
     if (dbCard.isVirtual) throw { type: "anathorized", message: "VirtualCards can not be recharged"};
-    if (dayjs(dbCard.expirationDate).diff(dayjs()) < 0) throw expirateCardError();
+    if (dayjs(dbCard.expirationDate.split("/")[0]+"/01/"+dbCard.expirationDate.split("/")[1]).diff(dayjs(), "month") < 0) throw expirateCardError();
 
-    await insert({cardId, amount});
+    await insert({
+        cardId,
+        amount
+    });
 
-    //refatorar com a função em cardServices
     const cardTransactions = await findTransactionsByCardId(cardId);
     const cardRecharges = await findRechargesByCardId(cardId);
 
-    return cardRecharges.reduce((total, curr) => {return total += curr.amount}, 0) - cardTransactions.reduce((total, curr) => { return total += curr.amount}, 0);
+    return generateBalance(cardRecharges, cardTransactions);
 }
