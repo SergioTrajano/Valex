@@ -36,7 +36,7 @@ O Body da requisição deve ser feito no seguinte formato:
 
 ```json
 {
-  "id": id_do_cartão, //number
+  "id": "id_do_cartão", //number
   "securityCode": "cvc_do_cartao", //string
   "password": "senha_escolhida" //string
 }
