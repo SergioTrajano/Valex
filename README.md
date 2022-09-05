@@ -68,7 +68,7 @@ O Body da requisição deve ser feito no seguinte formato:
 
 ```json
 {
-  "id": id_do_cartão, //number
+  "id": "id_do_cartão", //number
   "password": "senha_do_cartão" //string
 }
 ```
@@ -96,7 +96,7 @@ O Body da requisição deve ser feito no seguinte formato:
 
 ```json
 {
-  "id": id_do_cartão, //number
+  "id": "id_do_cartão", //number
   "amount": "valor_escolhido" //number
 }
 ```
@@ -108,10 +108,10 @@ Essa é uma rota não autenticada. Sua função é permitir aos funcionários fa
 
 ```json
 {
-  "cardId": id_do_cartão, //number
+  "cardId": "id_do_cartão", //number
   "password": "senha_do_cartão", //string
-  "businessId": id_do_estabelecimento, //number
-  "amount": valor_da_compra //number
+  "businessId": "id_do_estabelecimento", //number
+  "amount": "valor_da_compra" //number
 }
 ```
 
@@ -124,7 +124,7 @@ Essa é uma rota não autenticada. Sua função é permitir aos funcionários fa
   "number": "número do cartão", //string
   "name": "nome do dono do cartão", //string
   "securityCode": "cvc_do_cartao", //string
-  "businessId": id_do_estabelecimento, //number
-  "amount": valor_da_compra //number
+  "businessId": "id_do_estabelecimento", //number
+  "amount": "valor_da_compra" //number
 }
 ```
