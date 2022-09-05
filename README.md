@@ -10,8 +10,8 @@ O Body da requisição deve ser feito no seguinte formato:
 
 ```json
 {
-	employeeId: id_do_funcionario, //number
-	cardType: "tipo_do_cartão" //'groceries', 'restaurants', 'transport', 'education', 'health'
+	"employeeId": "id_do_funcionario", //number
+	"cardType": "tipo_do_cartão" //'groceries', 'restaurants', 'transport', 'education', 'health'
 }
 ```
 
@@ -23,8 +23,8 @@ O Body da requisição deve ser feito no seguinte formato:
 
 ```json
 {
-	id: id_do_cartão, //number
-	password: "senha_do_cartão" //string
+	"id": "id_do_cartão", //number
+	"password": "senha_do_cartão" //string
 }
 ```
 
@@ -81,8 +81,8 @@ O Body da requisição deve ser feito no seguinte formato:
 
 ```json
 {
-	id: id_do_cartão_virtual, //number
-	password: "senha_do_cartão" //string
+	"id": "id_do_cartão_virtual", //number
+	"password": "senha_do_cartão" //string
 }
 ```
 
