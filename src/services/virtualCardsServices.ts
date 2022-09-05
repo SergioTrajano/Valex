@@ -17,11 +17,12 @@ export async function createVirtualCardService(id: number, password: string) {
     let cardNumber = generateCardData.generateCardNumber();
     while (allDbCards.some(card => card.number === cardNumber)) cardNumber = generateCardData.generateCardNumber();
 
+    const securityCode: string = generateCardData.generateSecurityCode();
     const cardData = {
         employeeId: dbCard.employeeId,
         number: cardNumber,
         cardholderName: dbCard.cardholderName,
-        securityCode: encryptSecurityCode(generateCardData.generateSecurityCode()),
+        securityCode: encryptSecurityCode(securityCode),
         expirationDate: generateCardData.generateExpirationDate(),
         password: dbCard.password,
         isVirtual: true,
@@ -32,7 +33,7 @@ export async function createVirtualCardService(id: number, password: string) {
     
     await insert(cardData);
 
-    return cardData;
+    return {...cardData, securityCode: securityCode};
 }
 
 export async function deleteVirtualCardService(id: number, password: string) {

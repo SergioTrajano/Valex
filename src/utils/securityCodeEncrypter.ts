@@ -4,7 +4,7 @@ const CRYPTR_KEY: string = process.env.CRYPTR_KEY || "valex";
 const cryptr = new Cryptr(CRYPTR_KEY);
 
 
-export function encryptSecurityCode(securityCode: string) { console.log(securityCode);
+export function encryptSecurityCode(securityCode: string) {
     return cryptr.encrypt(securityCode);
 }
 

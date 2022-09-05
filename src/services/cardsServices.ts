@@ -46,11 +46,12 @@ export async function createCardname(APIKey: any ,employeeId: number, cardType: 
     let cardNumber = generateCardData.generateCardNumber();
     while (allDbCards.some(card => card.number === cardNumber)) cardNumber = generateCardData.generateCardNumber();
     
+    const securityCode: string = generateCardData.generateSecurityCode();
     const cardData = {
         employeeId,
         number: cardNumber,
         cardholderName: generateCardData.formatCardHolderName(employeedData.fullName),
-        securityCode: encryptSecurityCode(generateCardData.generateSecurityCode()),
+        securityCode: encryptSecurityCode(securityCode),
         expirationDate: generateCardData.generateExpirationDate(),
         password: undefined,
         isVirtual: false,
@@ -61,7 +62,7 @@ export async function createCardname(APIKey: any ,employeeId: number, cardType: 
     
     await insert(cardData);
 
-    return cardData;
+    return {...cardData, securityCode: securityCode};
 }
 
 export async function activateCard(id: number, password: string, securityCode: string) {
