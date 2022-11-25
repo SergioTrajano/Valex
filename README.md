@@ -1,4 +1,31 @@
-# projeto18-valex
+# <p align = "center"> Valex </p>
+
+<p align="center">
+   <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQu03_1UQe4VVpkdgjZt54GEsmy_cBbd6K6Xg&usqp=CAU"/>
+</p>
+
+<p align = "center">
+   <img src="https://img.shields.io/badge/author-SergioTrajano-4dae71?style=flat-square" />
+   <img src="https://img.shields.io/github/languages/count/SergioTrajano/Valex?color=4dae71&style=flat-square" />
+</p>
+
+
+##  :clipboard: Descrição
+
+Está é uma API de cartões de benefícios. A API é responsável pela criação, recarga, ativação e o processamento das compras.
+
+***
+
+## :computer:	 Tecnologias e Conceitos
+
+- REST APIs
+- Node.js
+- TypeScript
+- PostgreSQL
+- Express
+- Bcrypt e Cryptr
+
+***
 
 # Rotas de criação e gerenciamento de cartões:
 
