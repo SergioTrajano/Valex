@@ -155,3 +155,24 @@ Essa é uma rota não autenticada. Sua função é permitir aos funcionários fa
   "amount": "valor_da_compra" //number
 }
 ```
+
+***
+
+## 🏁 Rodando a aplicação
+
+Primeiro, faça o clone desse repositório na sua maquina:
+
+```
+git clone https://github.com/SergioTrajano/Valex
+```
+
+Depois, dentro da pasta, rode o seguinte comando para instalar as dependencias.
+
+```
+npm install
+```
+
+Finalizado o processo, é só inicializar o servidor
+```
+npm start
+```
